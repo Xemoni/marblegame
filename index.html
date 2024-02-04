@@ -243,12 +243,6 @@
             } else {
                 startButton.style.display = 'none';
             }
-
-            if (gameOver) {
-                restartButton.style.display = 'block';
-            } else {
-                restartButton.style.display = 'none';
-            }
         }
         
         function startGame() {
@@ -259,6 +253,7 @@
         }
 
         function restartGame() {
+            gameStarted = false;
             ball.x = 50;
             ball.y = canvas.height / 2;
             ball.directionX = 0;
