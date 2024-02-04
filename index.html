@@ -131,13 +131,12 @@
                 this.touchY = '';
                 this.touchTreshold = 30;
                 window.addEventListener('touchstart', e => {
-                    console.log('Touch Start');
+                    console.log('start');
                     this.touchY = e.changedTouches[0].pageY;
                 });
                 window.addEventListener('touchmove', e => {
-                    console.log('Touch Move');
+                    console.log('moving');
                     const swipeDistance = e.changedTouches[0].pageY - this.touchY;
-                    console.log('Swipe Distance:', swipeDistance);
                     if (swipeDistance < -this.touchTreshold && this.keys.indexOf('swipe up') === -1) {
                         this.keys.push('swipe up');
                         ball.move(0, -1);
@@ -147,11 +146,15 @@
                     }
                 });
                 window.addEventListener('touchend', e => {
-                    console.log('Touch End');
+                    console.log('end');
                     ball.move(0, 0);
                 });
+
+                
             }
         }
+
+        const inputHandler = new InputHandler;
 
         function toggleFullScreen() {
             console.log(document.fullscreenElement);
