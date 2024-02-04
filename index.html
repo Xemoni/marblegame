@@ -105,7 +105,7 @@
         };
 
         function isInHole(ball) {
-            const distance = Math.sqrt((ball.x - hole.x)) ** 2 + (ball.y - hole.y ** 2);
+            const distance = Math.sqrt((ball.x - hole.x) ** 2 + (ball.y - hole.y) ** 2);
             return distance < ball.radius + hole.radius; 
         }
 
@@ -131,38 +131,25 @@
                 this.touchY = '';
                 this.touchTreshold = 30;
                 window.addEventListener('touchstart', e => {
+                    console.log('Touch Start');
                     this.touchY = e.changedTouches[0].pageY;
                 });
                 window.addEventListener('touchmove', e => {
-                    if (!gameStarted) {
-                        gameStarted = true;
-                        ball.move(1, 0)
-                    }
+                    console.log('Touch Move');
                     const swipeDistance = e.changedTouches[0].pageY - this.touchY;
+                    console.log('Swipe Distance:', swipeDistance);
                     if (swipeDistance < -this.touchTreshold && this.keys.indexOf('swipe up') === -1) {
                         this.keys.push('swipe up');
                         ball.move(0, -1);
-                    } else if (swipeDistance > this.touchTreshold && this.keys.indexOf('swipe down') === -1)
-                    {
+                    } else if (swipeDistance > this.touchTreshold && this.keys.indexOf('swipe down') === -1) {
                         this.keys.push('swipe down');
                         ball.move(0, 1);
                     }
                 });
                 window.addEventListener('touchend', e => {
-                    ball.move(0, 0); 
+                    console.log('Touch End');
+                    ball.move(0, 0);
                 });
-
-                window.addEventListener('deviceorientation', e => {
-                    const gamma = e.gamma;
-                    const beta = e.beta;
-
-                    ball.speed = Math.abs(gamma) + Math.abs(beta);
-
-                    const normalizedGamma = gamma / 90;
-                    const normalizedBeta = beta / 90;
-
-                    ball.move(normalizedGamma, normalizedBeta)
-                })
             }
         }
 
@@ -193,7 +180,9 @@
             updateGame(deltaTime);
             lastTime = timestamp;
 
-            window.requestAnimationFrame(gameLoop);
+            if (!gameOver) {
+                window.requestAnimationFrame(gameLoop);
+            }
         }
 
         if ('orientation' in screen && 'lock' in screen.orientation) {
