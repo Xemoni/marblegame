@@ -170,7 +170,7 @@
                 targetGamma += (e.gamma - targetGamma) * easingFactor;
 
                 const threshold = 5;
-                ball.move(e.beta / threshold, -e.gamma / threshold);
+                ball.move(targetBeta / threshold, -targetGamma / threshold);
             }
         }
 
@@ -220,19 +220,11 @@
                 document.getElementById('victory').play();
                 endGame();
             }
-
-            requestAnimationFrame(render);
         }
-
-        function render() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            updateGame();
-        }
-
+        
         function startGame() {
             if (!gameStarted) {
                 gameStarted = true;
-                document.getElementById('victory').pause(); // Pause victory sound if playing
                 requestAnimationFrame(gameLoop);
             }
         }
