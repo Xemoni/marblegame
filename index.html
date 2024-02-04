@@ -38,6 +38,8 @@
         let lastTime;
         let gameOver = false;
         let gameStarted = false;
+        let targetBeta = 0;
+        let targetGamma = 0;
 
         const fullScreenButton = document.getElementById("fullScreenButton");
         const victorySound = document.getElementById('victory')
@@ -161,30 +163,12 @@
             );
         }
 
-        function updateGame() {
-            ctx.fillStyle = 'green';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            ball.update();
-            ball.draw();
-
-            for (const hole of holes) {
-                drawHole(hole);
-                if (isInHole(ball, hole)) {
-                    restartGame();
-                    vibrateDevice();
-                }
-            }
-
-            goal.draw();
-            if (checkGoalCollision(ball, goal)) {
-                document.getElementById('victory').play();
-                endGame();
-            }
-        }
-
         function handleDeviceOrientation(e) {
             if (gameStarted) {
+                const easingFactor = 0.1;
+                targetBeta += (e.beta - targetBeta) * easingFactor;
+                targetGamma += (e.gamma - targetGamma) * easingFactor;
+
                 const threshold = 5;
                 ball.move(e.beta / threshold, -e.gamma / threshold);
             }
@@ -215,6 +199,36 @@
 
         const inputHandler = new InputHandler;
 
+
+        function updateGame() {
+            ctx.fillStyle = 'green';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ball.update();
+            ball.draw();
+
+            for (const hole of holes) {
+                drawHole(hole);
+                if (isInHole(ball, hole)) {
+                    restartGame();
+                    vibrateDevice();
+                }
+            }
+
+            goal.draw();
+            if (checkGoalCollision(ball, goal)) {
+                document.getElementById('victory').play();
+                endGame();
+            }
+
+            requestAnimationFrame(render);
+        }
+
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            updateGame();
+        }
+
         function startGame() {
             if (!gameStarted) {
                 gameStarted = true;
@@ -223,8 +237,8 @@
             }
         }
 
-
         function restartGame() {
+            gameStarted = false;
             ball.x = 50;
             ball.y = canvas.height / 2;
             ball.directionX = 0;
@@ -249,14 +263,6 @@
             if (!gameOver) {
                 window.requestAnimationFrame(gameLoop);
             }
-        }
-
-        function restartGame() {
-            gameStarted = false;
-            ball.x = 50;
-            ball.y = canvas.height / 2;
-            ball.directionX = 0;
-            ball.directionY = 0;
         }
 
         if ('orientation' in screen && 'lock' in screen.orientation) {
