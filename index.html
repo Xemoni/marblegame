@@ -40,6 +40,30 @@
         let gameStarted = false;
 
         const fullScreenButton = document.getElementById("fullScreenButton");
+        const victorySound = document.getElementById('victory')
+
+        fullScreenButton.addEventListener('click', function() {
+            toggleFullScreen();
+            playVictorySound();
+        });
+
+        function playVictorySound() {
+            if (victorySound) {
+                victorySound.play().catch(error => {
+                    console.error("Error playing audio:", error.message);
+                });
+            }
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                canvas.requestFullscreen().catch(err => {
+                    alert(`Error, can't enable fullscreen mode: ${err.message}`)
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
 
         const ball = {
             x: 50,
@@ -159,11 +183,18 @@
             }
         }
 
+        function handleDeviceOrientation(e) {
+            if (gameStarted) {
+                const threshold = 5;
+                ball.move(e.beta / threshold, -e.gamma / threshold);
+            }
+        }
+
         class InputHandler {
             constructor() {
                 this.touchStartX = 0;
                 this.touchStartY = 0;
-                this.touchTreshold = 30;
+                this.touchThreshold = 30;
                 this.swipeThreshold = 10;
 
                 window.addEventListener('touchstart', e => {
@@ -171,41 +202,27 @@
                     this.touchStartY = e.changedTouches[0].pageY;
                 });
 
-                window.addEventListener('touchmove', e => {
-                    const touchX = e.changedTouches[0].pageX;
-                    const touchY = e.changedTouches[0].pageY;
-
-                    const deltaX = touchX - this.touchStartX;
-                    const deltaY = touchY - this.touchStartY;
-
-                    if (Math.abs(deltaX) > this.swipeThreshold) {
-                        this.touchStartX = touchX;
-                        ball.move(deltaX > 0 ? 1 : -1, 0);
-                    } else if (Math.abs(deltaY) > this.swipeThreshold) {
-                        this.touchStartY = touchY;
-                        ball.move(0, deltaY > 0 ? 1 : -1);
+                window.addEventListener('touchend', () => {
+                    if (!gameStarted) {
+                        startGame();
                     }
                 });
 
-                window.addEventListener('touchend', () => {
-                    ball.move(0, 0);
-                });
+                window.addEventListener('deviceorientation', handleDeviceOrientation);
+
             }
         }
 
         const inputHandler = new InputHandler;
 
-        function toggleFullScreen() {
-            console.log(document.fullscreenElement);
-            if (!document.fullscreenElement) {
-                canvas.requestFullscreen().catch(err => {
-                    alert(`Error, can't enable fullscreen mode: ${err.message}`)
-                });
-            } else {
-                document.exitFullscreen();
+        function startGame() {
+            if (!gameStarted) {
+                gameStarted = true;
+                document.getElementById('victory').pause(); // Pause victory sound if playing
+                requestAnimationFrame(gameLoop);
             }
         }
-        fullScreenButton.addEventListener('click', toggleFullScreen);
+
 
         function restartGame() {
             ball.x = 50;
@@ -232,6 +249,14 @@
             if (!gameOver) {
                 window.requestAnimationFrame(gameLoop);
             }
+        }
+
+        function restartGame() {
+            gameStarted = false;
+            ball.x = 50;
+            ball.y = canvas.height / 2;
+            ball.directionX = 0;
+            ball.directionY = 0;
         }
 
         if ('orientation' in screen && 'lock' in screen.orientation) {
